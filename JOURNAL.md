@@ -180,15 +180,9 @@ than added blind.
 
 ### Check-in 2 (end of week)
 
-**PR link:** https://github.com/ascherj/pathreview/pull/306
+**PR link:** _(not submitted)_
 
 **Branch:** `test/73-pii-scrubber-address-formats`
-
-> Note on the upstream: `jamjamgobambam/pathreview` (referenced in my Week 7–8
-> entries) was renamed/transferred to `ascherj/pathreview` — they are the same
-> repo — so per `docs/CONTRIBUTING.md` the PR targets `ascherj/pathreview:main`.
-> Issue #73 has since been deleted upstream (the API returns `410`), so the PR
-> references it as text rather than a `Closes #` auto-link.
 
 **What you built:**
 Broadened the `street_address` regex in `safety/pii_scrubber.py` so it redacts
