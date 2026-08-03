@@ -216,3 +216,89 @@ assert, and added `test_numbered_street_names_redacted`,
 >   clean, and black's only diff is in `detect()` — a method I did not touch.
 
 **Draft PR feedback received from:** none
+
+## Week 10 — Iteration & reflection
+
+### Reviewer feedback
+
+**Feedback received:** [ ] Yes  [x] No — still awaiting review
+
+**Summary of feedback:**
+No review came in. The work is committed on
+`test/73-pii-scrubber-address-formats` (the fix in `8647732`, the tests in
+`ea7e170`), but I never opened the PR against the upstream repo — I added a PR
+link to my Week 9 check-in and then removed it because it didn't point to a real
+submitted PR. So there was nothing for a maintainer to review, and the honest
+state at the close of the module is: change finished and self-reviewed, not yet
+submitted upstream.
+
+**How you responded:**
+Rather than paper over that, I'm leaving the check-in accurate ("not submitted")
+and treating the missing submission as the main process lesson of the module
+(see below). The branch is in a state where opening the PR is a mechanical next
+step — the template content is already written into the Week 9 entry.
+
+---
+
+### Reflection
+
+**What was harder than you expected?**
+Two things. First, the regex itself was deceptively fiddly. The visible bug was
+"numbered streets don't redact," but the fix that actually made the tests green
+was a *trailing* `\b` on the street-suffix alternation — without it, `Pl` matched
+inside "applications" and the scrubber over-redacted ordinary prose. So the hard
+part wasn't catching more addresses, it was catching more without catching less,
+and that only showed up because I wrote the negative ("no false positives") test
+before I was confident the pattern was done. Second, and harder: deciding what
+"passes" even means in a repo that ships with ~53 failing unit tests and ~181
+lint errors on a clean `main`. I expected a green baseline to measure against and
+there wasn't one. I had to redefine success as "introduces no new failures" and
+then actually prove it by diffing counts before and after (53 → 52 unit, 6 → 5
+ruff on my files), which is a much more annoying thing to stand behind than a
+green checkmark.
+
+**What did you learn about working in a large codebase?**
+That the most important skill isn't writing the fix, it's drawing the boundary
+around it. On my own project everything is in scope by definition. Here, I kept
+tripping over adjacent broken things — the parenthesized-phone-number bug
+(`(555) 123-4567`), the question of whether ZIP codes count as "address
+formats" — and the discipline was to *not* fix them. I scoped the phone bug out
+in Week 7 as its own issue and kept ZIP out because a bare 5-digit pattern
+over-redacts any number. Both were tempting one-liners; both would have made the
+change harder to review and muddied what the PR was actually claiming. In
+someone else's production code, a small honest diff that does exactly what it
+says is worth more than a clever big one.
+
+**How did AI tools help — and where did they fall short?**
+Most useful for the mechanical middle: drafting regex variants, enumerating
+address formats to test (numbered streets, lettered house numbers, abbreviated
+suffixes with periods, embedded-in-a-sentence), and generating the reproduction
+snippet quickly so I could confirm the leak on an untouched `main`. Where it fell
+short was exactly the judgment calls that made this a real contribution: it
+couldn't tell me that the repo's baseline was already red (I had to run it and
+see), it couldn't decide the scope boundary for me, and it happily would have
+"finished" by declaring tests pass without me insisting on the before/after count
+diff. The over-redaction-of-"applications" behavior also came from actually
+running the suite, not from reasoning about the pattern. AI compressed the typing;
+the verification and the scoping were on me.
+
+**What would you do differently if you started over?**
+Open the PR early as a draft, in Week 8, right after reproduction — before the
+fix even exists. The single concrete failure of this module is that a finished,
+self-reviewed change never got submitted, and that happened because I treated PR
+submission as a final ceremony instead of a container I could fill incrementally.
+A draft PR from the start would have given me a real URL to put in every
+check-in, surfaced CI behavior against the actual baseline sooner, and made
+submission a non-event. Everything technical went fine; the thing I'd change is
+purely process sequencing.
+
+**What are you most proud of from this module?**
+That I didn't hide the messy parts. The existing `test_address_variations`
+"passed" while asserting nothing — it was green and worthless — and the easy path
+was to leave that illusion in place. Instead I made the coverage real, wrote a
+negative test that caught my own over-redaction, and documented an honest
+"no new failures" standard against a genuinely broken baseline rather than
+claiming a clean pass I couldn't back up. The redaction of one leaked address
+matters, but what I'm actually proud of is the habit of preferring an accurate
+uncomfortable status over a tidy false one.
+
